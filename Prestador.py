@@ -17,6 +17,19 @@ class Prestador(object):
         self.cep = cep
         self.contato = contato
 
+    @staticmethod
+    def listAll():
+        banco = Banco()
+        try:
+            c = banco.conexao.cursor()
+            c.execute("""select id, nome, cpf_cnpj, cidade, uf, contato
+                         from prestadores order by id desc""")
+            linhas = c.fetchall()
+            c.close()
+            return linhas
+        except Exception:
+            return []
+
     def insertPrestador(self):
         banco = Banco()
         try:
