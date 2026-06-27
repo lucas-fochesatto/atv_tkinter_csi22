@@ -67,10 +67,15 @@ class FormularioPrestador:
         ("Contato", "contato"),
     ]
 
-    def __init__(self, parent, ao_salvar=None):
+    def __init__(self, parent, ao_salvar=None, prestador=None):
         self.ao_salvar = ao_salvar
+        # prestador None = modo cadastro; com objeto = modo edição
+        self.prestador = prestador
+        self.modo_edicao = prestador is not None
+
         self.janela = tk.Toplevel(parent)
-        self.janela.title("Adicionar Prestador")
+        self.janela.title("Editar Prestador" if self.modo_edicao
+                          else "Adicionar Prestador")
 
         self.entries = {}
         for i, (label, attr) in enumerate(self.campos):
@@ -80,13 +85,18 @@ class FormularioPrestador:
             entry.grid(row=i, column=1, padx=5, pady=2)
             self.entries[attr] = entry
 
+            # em modo edição, pré-preenche cada campo com o valor atual
+            if self.modo_edicao:
+                entry.insert(0, getattr(self.prestador, attr))
+
         # gatilho do auto-preenchimento: ao sair do campo CEP, busca o endereço
         self.entries["cep"].bind("<FocusOut>", self.preencherEndereco)
 
         linha = len(self.campos)
-        tk.Button(self.janela, text="Cadastrar",
-                  command=self.cadastrar).grid(row=linha, column=1,
-                                               sticky="e", padx=5, pady=8)
+        texto_botao = "Salvar" if self.modo_edicao else "Cadastrar"
+        tk.Button(self.janela, text=texto_botao,
+                  command=self.salvar).grid(row=linha, column=1,
+                                            sticky="e", padx=5, pady=8)
 
     def preencherEndereco(self, event=None):
         cep = self.entries["cep"].get().strip()
@@ -101,18 +111,26 @@ class FormularioPrestador:
         # preencher rua, bairro, cidade e uf usando o dict 'endereco'
         pass
 
-    def cadastrar(self):
+    def salvar(self):
         dados = {attr: self.entries[attr].get() for _, attr in self.campos}
-        prestador = Prestador(**dados)
-        mensagem = prestador.insertPrestador()
 
-        if mensagem.startswith("Prestador cadastrado"):
+        if self.modo_edicao:
+            # mantém o id do prestador em edição e atualiza
+            prestador = Prestador(id=self.prestador.id, **dados)
+            mensagem = prestador.updatePrestador()
+            sucesso = mensagem.startswith("Prestador atualizado")
+        else:
+            prestador = Prestador(**dados)
+            mensagem = prestador.insertPrestador()
+            sucesso = mensagem.startswith("Prestador cadastrado")
+
+        if sucesso:
             self.janela.destroy()
             if self.ao_salvar:
                 self.ao_salvar()
-            messagebox.showinfo("Cadastro", mensagem)
+            messagebox.showinfo("Prestador", mensagem)
         else:
-            messagebox.showerror("Cadastro", mensagem, parent=self.janela)
+            messagebox.showerror("Prestador", mensagem, parent=self.janela)
 
 
 if __name__ == "__main__":
