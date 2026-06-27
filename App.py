@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from Prestador import Prestador
+from cep import buscar_cep
 
 
 class App:
@@ -56,13 +57,13 @@ class FormularioPrestador:
         ("Nome", "nome"),
         ("CPF ou CNPJ", "cpf_cnpj"),
         ("Data Nascimento", "data_nascimento"),
+        ("CEP", "cep"),
         ("Rua", "rua"),
         ("Número", "numero"),
         ("Complemento", "complemento"),
         ("Bairro", "bairro"),
         ("Cidade", "cidade"),
         ("UF", "uf"),
-        ("CEP", "cep"),
         ("Contato", "contato"),
     ]
 
@@ -79,10 +80,26 @@ class FormularioPrestador:
             entry.grid(row=i, column=1, padx=5, pady=2)
             self.entries[attr] = entry
 
+        # gatilho do auto-preenchimento: ao sair do campo CEP, busca o endereço
+        self.entries["cep"].bind("<FocusOut>", self.preencherEndereco)
+
         linha = len(self.campos)
         tk.Button(self.janela, text="Cadastrar",
                   command=self.cadastrar).grid(row=linha, column=1,
                                                sticky="e", padx=5, pady=8)
+
+    def preencherEndereco(self, event=None):
+        cep = self.entries["cep"].get().strip()
+        if not cep:
+            return  # campo vazio: não faz nada
+
+        endereco = buscar_cep(cep)
+        if endereco is None:
+            return
+
+        # para cada campo, limpar o conteúdo atual e depois inserir o novo.
+        # preencher rua, bairro, cidade e uf usando o dict 'endereco'
+        pass
 
     def cadastrar(self):
         dados = {attr: self.entries[attr].get() for _, attr in self.campos}
