@@ -35,10 +35,22 @@ def _formatar_cnpj(d):
 
 
 def mascara_data(texto):
-    # TODO: implementar
-    return texto
+    """
+    Formato: DD/MM/AAAA 
+    """
+    d = _digitos(texto)[:8]
+    if len(d) <= 2:
+        return d
+    if len(d) <= 4:
+        return d[:2] + "/" + d[2:]
+    return d[:2] + "/" + d[2:4] + "/" + d[4:8]
 
 
 def mascara_cep(texto):
-    # TODO: implementar
-    return texto
+    """
+    Formato: 00000-000 ( 8 dígitos totais)
+    """
+    d = _digitos(texto)[:8]
+    if len(d) <= 5:
+        return d
+    return d[:5] + "-" + d[5:]
