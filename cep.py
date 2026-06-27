@@ -16,29 +16,28 @@ def buscar_cep(cep):
         return None
 
     try:
-        # monte a URL no formato: https://viacep.com.br/ws/<cep>/json/
-        url = ""
+        # Montagem da URL
+        url = f"https://viacep.com.br/ws/{cep}/json/"
 
-        # fazer a requisição e ler a resposta em bytes
-        # urllib.request.urlopen(url) e depois .read()
-        resposta = b"{}"
+        #requisição HTTP via urllib 
+        with urllib.request.urlopen(url) as response:
+            resposta = response.read()
 
-        # converter os bytes JSON em um dicionário Python
-        # json.loads(...)
-        dados = {}
+        #conversão de bytes JSON para dicionário Python
+        dados = json.loads(resposta)
 
+        # Verificação se o CEP existe
         if dados.get("erro"):
             return None
 
-        # As chaves da ViaCEP são diferentes das nossas:
-        #   logradouro -> rua
-        #   bairro     -> bairro
-        #   localidade -> cidade
-        #   uf         -> uf
+        #adaptando para o nosso sistema o que a API devolve
+        return {
+            "rua": dados.get("logradouro", ""),
+            "bairro": dados.get("bairro", ""),
+            "cidade": dados.get("localidade", ""),
+            "uf": dados.get("uf", "")
+        }
 
-        # montar e retorne o dicionário no NOSSO formato
-        return {}
-
-    except Exception:
-        # Sem internet, timeout, resposta inesperada... não preenche nada
+    except Exception as e:
+        print(f"[Debug] Falha na requisição ViaCEP: {e}")
         return None
