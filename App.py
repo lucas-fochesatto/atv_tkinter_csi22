@@ -1,8 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from Prestador import Prestador
 from FormularioCadastro import FormularioCadastro
+from FormularioEdicao import FormularioEdicao
 
 
 class App:
@@ -32,6 +33,10 @@ class App:
                   command=self.abrirFormulario).pack(side="left")
         tk.Button(topo, text="Atualizar lista",
                   command=self.carregarPrestadores).pack(side="left", padx=5)
+        tk.Button(topo, text="Editar",
+                  command=self.editarSelecionado).pack(side="left", padx=(0, 5))
+        tk.Button(topo, text="Excluir",
+                  command=self.excluirSelecionado).pack(side="left")
 
         colunas = [c[0] for c in self.COLUNAS]
         self.tabela = ttk.Treeview(self.root, columns=colunas, show="headings")
@@ -49,6 +54,33 @@ class App:
 
     def abrirFormulario(self):
         FormularioCadastro(self.root, ao_salvar=self.carregarPrestadores)
+
+    def _idSelecionado(self):
+        selecao = self.tabela.selection()
+        if not selecao:
+            messagebox.showinfo("Atenção", "Selecione um prestador na tabela primeiro.")
+            return None
+        # o id é o primeiro valor da linha
+        return self.tabela.item(selecao[0], "values")[0]
+
+    def editarSelecionado(self):
+        id = self._idSelecionado()
+        if id is None:
+            return
+        prestador = Prestador()
+        prestador.selectPrestador(id)
+        FormularioEdicao(self.root, prestador, ao_salvar=self.carregarPrestadores)
+
+    def excluirSelecionado(self):
+        id = self._idSelecionado()
+        if id is None:
+            return
+        if not messagebox.askyesno("Confirmar", "Excluir o prestador selecionado?"):
+            return
+        prestador = Prestador(id=id)
+        mensagem = prestador.deletePrestador()
+        self.carregarPrestadores()
+        messagebox.showinfo("Excluir", mensagem)
 
 
 if __name__ == "__main__":
