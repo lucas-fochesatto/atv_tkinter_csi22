@@ -39,6 +39,8 @@ class FormularioPrestador:
 
         # máscaras de input ao vivo:
         self._conectar_mascara("cpf_cnpj", mascara_cpf_cnpj)
+        self._conectar_mascara("data_nascimento", mascara_data)
+        self._conectar_mascara("cep", mascara_cep)
 
         linha = len(self.campos)
         tk.Button(self.janela, text=self.texto_botao(),
