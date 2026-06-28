@@ -131,9 +131,14 @@ class Prestador(object):
         banco = Banco()
         try:
             c = banco.conexao.cursor()
-            # O operador LIKE com % busca qualquer coisa que contenha a substring
-            #pq nos queremos uma busca por "Like" isto eh, de substring, nao apenas por prefixo ou sufixo ou exata
-            c.execute("SELECT * FROM prestadores WHERE nome LIKE ?", (f'%{nome_busca}%',))
+            # usamos query para display na ordem correta e evitamos SQL injection usando parâmetros
+            # e usamos a busca com % e LIKE para permitir buscas parciais 
+            query = """
+                SELECT id, nome, cpf_cnpj, cidade, uf, contato 
+                FROM prestadores 
+                WHERE nome LIKE ?
+            """
+            c.execute(query, (f'%{nome_busca}%',))
             linhas = c.fetchall()
             c.close()
             
