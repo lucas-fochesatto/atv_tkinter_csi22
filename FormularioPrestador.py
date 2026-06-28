@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 from cep import buscar_cep
-from mascaras import mascara_cpf_cnpj
+from mascaras import mascara_cpf_cnpj, mascara_data, mascara_cep
 
 
 class FormularioPrestador:
@@ -82,9 +82,11 @@ class FormularioPrestador:
         if endereco is None:
             return
 
-        # para cada campo, limpar o conteúdo atual e depois inserir o novo.
-        # preencher rua, bairro, cidade e uf usando o dict 'endereco'
-        pass
+        # Varre os campos de endereço que vieram no dicionário da API
+        for campo in ["rua", "bairro", "cidade", "uf"]:
+            self.entries[campo].delete(0, tk.END)
+            
+            self.entries[campo].insert(0, endereco[campo])
 
     def salvar(self):
         dados = {attr: self.entries[attr].get() for _, attr in self.campos}
