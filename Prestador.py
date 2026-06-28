@@ -124,3 +124,21 @@ class Prestador(object):
                 return "Prestador não encontrado."
         except Exception as e:
             return f"Ocorreu um erro na busca do prestador: {e}"
+    
+    @staticmethod
+    def buscarPorNome(nome_busca):
+        from Banco import Banco
+        banco = Banco()
+        try:
+            c = banco.conexao.cursor()
+            # O operador LIKE com % busca qualquer coisa que contenha a substring
+            #pq nos queremos uma busca por "Like" isto eh, de substring, nao apenas por prefixo ou sufixo ou exata
+            c.execute("SELECT * FROM prestadores WHERE nome LIKE ?", (f'%{nome_busca}%',))
+            linhas = c.fetchall()
+            c.close()
+            
+            # Devolve apenas a lista pura, como o _preencherTabela do Tkinter espera
+            return linhas
+        except Exception as e:
+            print(f"Ocorreu um erro na busca: {e}")
+            return [] # Em caso de erro, devolve lista vazia para não quebrar a interface
