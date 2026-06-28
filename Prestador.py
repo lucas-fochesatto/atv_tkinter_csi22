@@ -30,6 +30,27 @@ class Prestador(object):
         except Exception:
             return []
 
+    @staticmethod
+    def buscarPorNome(nome):
+        """
+          - filtrar com o operador LIKE e o curinga %: where nome like ?
+          - montar o parâmetro como  "%" + nome + "%"
+          - pode ordenar por id desc, igual ao listAll
+        """
+        banco = Banco()
+        try:
+            c = banco.conexao.cursor()
+            # montar o SELECT das 6 colunas com WHERE nome LIKE ?
+
+            # executar passando o parâmetro, ex.: c.execute(query, ("%" + nome + "%",))
+
+            # pegar os resultados com c.fetchall()
+            c.close()
+
+            return []  # lista de linhas
+        except Exception:
+            return []
+
     def insertPrestador(self):
         banco = Banco()
         try:

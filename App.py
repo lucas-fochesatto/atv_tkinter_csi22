@@ -38,6 +38,15 @@ class App:
         tk.Button(topo, text="Excluir",
                   command=self.excluirSelecionado).pack(side="left")
 
+        # barra de pesquisa (lado direito): Label | Entry | Botão
+        self.busca = tk.StringVar()
+        tk.Button(topo, text="Buscar", command=self.pesquisar).pack(side="right")
+        busca_entry = tk.Entry(topo, textvariable=self.busca, width=25)
+        busca_entry.pack(side="right", padx=5)
+        busca_entry.bind("<Return>", lambda e: self.pesquisar())
+        tk.Label(topo, text="Pesquisar por nome:").pack(side="right",
+                                                        padx=(10, 0))
+
         colunas = [c[0] for c in self.COLUNAS]
         self.tabela = ttk.Treeview(self.root, columns=colunas, show="headings")
         for col_id, titulo in self.COLUNAS:
@@ -45,12 +54,22 @@ class App:
             self.tabela.column(col_id, width=120)
         self.tabela.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
-    def carregarPrestadores(self):
-        # limpa a tabela e recarrega do banco
+    def _preencherTabela(self, linhas):
+        # limpa a tabela e insere as linhas recebidas
         for item in self.tabela.get_children():
             self.tabela.delete(item)
-        for linha in Prestador.listAll():
+        for linha in linhas:
             self.tabela.insert("", "end", values=linha)
+
+    def carregarPrestadores(self):
+        self._preencherTabela(Prestador.listAll())
+
+    def pesquisar(self):
+        termo = self.busca.get().strip()
+        if not termo:
+            self.carregarPrestadores()  # busca vazia = mostra todos
+            return
+        self._preencherTabela(Prestador.buscarPorNome(termo))
 
     def abrirFormulario(self):
         FormularioCadastro(self.root, ao_salvar=self.carregarPrestadores)
